@@ -5,6 +5,19 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { twobttns } from "~/server/twobttns.ts";
+
+
+function generatePlayURL(phoneNumber: string) {
+  const url = twobttns.generatePlayUrl({
+    gameId: "your-awesome-game",
+    playerId: phoneNumber,
+    numItems: 42,
+    callbackUrl: "https://example.com/callback",
+  });
+
+  return url;
+}
 
 export const postRouter = createTRPCRouter({
   hello: publicProcedure
@@ -15,6 +28,13 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
+  generatePlayUrl: protectedProcedure
+    .input(z.object({ phoneNumber: z.string().min(1) }))
+    .query(({ input }) => {
+      const playURL = generatePlayURL(input.phoneNumber);
+      return { playURL };
+    }),
+    
   create: protectedProcedure
     .input(z.object({ name: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
